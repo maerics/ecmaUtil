@@ -1,0 +1,18 @@
+<job id="FindDisplayVersions">
+  <script language="jscript" src="registry.js"/>
+  <script language="jscript">
+    // Search the registry and gather 20 DisplayVersion values.
+    var reg = new Registry()
+      , rootKey = 'SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Installer\\UserData\\S-1-5-18\\Products'
+      , displayVersions = [];
+    reg.find(rootKey, function(path, value) {
+      var re = /Products\\(.*?)\\InstallProperties\\DisplayVersion$/;
+      if (re.exec(path)) {
+        displayVersions.push(RegExp.$1 + '\t=\t' + value);
+        if (displayVersions.length >= 20) { return false; }
+      } 
+      return true; // Keep looking at keys.
+    });
+    WScript.Echo(displayVersions.join("\n"));
+  </script>
+</job>
