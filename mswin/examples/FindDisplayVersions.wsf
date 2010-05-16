@@ -1,18 +1,26 @@
-<job id="FindDisplayVersions">
-  <script language="jscript" src="registry.js"/>
-  <script language="jscript">
-    // Search the registry and gather 20 DisplayVersion values.
-    var reg = new Registry()
-      , rootKey = 'SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Installer\\UserData\\S-1-5-18\\Products'
-      , displayVersions = [];
-    reg.find(rootKey, function(path, value) {
-      var re = /Products\\(.*?)\\InstallProperties\\DisplayVersion$/;
-      if (re.exec(path)) {
-        displayVersions.push(RegExp.$1 + '\t=\t' + value);
-        if (displayVersions.length >= 20) { return false; }
-      } 
-      return true; // Keep looking at keys.
-    });
-    WScript.Echo(displayVersions.join("\n"));
-  </script>
-</job>
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+  <job id="FindDisplayVersions">
+    <script language="jscript" src="../registry.js"/>
+    <script language="jscript">
+      // Search the registry and gather 20 DisplayVersion values.
+      var reg = new Registry()
+        , rootKey = 'SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Installer\\UserData\\S-1-5-18\\Products'
+        , keyRegex = /Products\\(.*?)\\InstallProperties\\DisplayVersion$/
+        , valRegex = /^1\./
+        , maxResults = 20
+        , uids = [];
+      reg.find(rootKey, function(path, value) {
+        var keyMatch = keyRegex.exec(path);
+        if (keyMatch) {
+          if (valRegex.exec(value)) {
+            uids.push(keyMatch[1] + '\t=\t' + value);
+            if (uids.length >= maxResults) { return false; } // Stop searching.
+          }
+        } 
+        return true; // Keep searching.
+      });
+      WScript.Echo(uids.join("\n"));
+    </script>
+  </job>
+</package>
