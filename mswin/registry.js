@@ -58,7 +58,7 @@ Registry.prototype.find = function(rootKey, handler) {
     , that = this;
   var findInner = function(key) {
     // Yield all values to the handler.
-    var oOut = that.EnumValues({sSubKeyName:key});
+    var oOut = that.EnumValues({hDefKey: that.iTree, sSubKeyName:key});
     try {
       var aNames = oOut.sNames.toArray()
         , aTypes = oOut.Types.toArray();
@@ -66,7 +66,7 @@ Registry.prototype.find = function(rootKey, handler) {
         // TODO: yield the appropriate value, not just strings.
         if (aTypes[i] === Registry.type.REG_SZ) {
           var valueName = key + '\\' + aNames[i];
-          oOut = that.GetStringValue({sSubKeyName:key, sValueName:aNames[i]});
+          oOut = that.GetStringValue({hDefKey: that.iTree, sSubKeyName:key, sValueName:aNames[i]});
           if (!handler(valueName, oOut.sValue.toString())) {
             throw new StopWalkingException();
           }
@@ -76,7 +76,7 @@ Registry.prototype.find = function(rootKey, handler) {
       if (e instanceof StopWalkingException) throw e;
     }
     // Recurse into any sub keys.
-    oOut = that.EnumKey({sSubKeyName:key});
+    oOut = that.EnumKey({hDefKey: that.iTree, sSubKeyName:key});
     try {
       var aSubKeys = oOut.sNames.toArray();
       for (var i=0; i<aSubKeys.length; i++) {
